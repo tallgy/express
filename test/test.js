@@ -6,22 +6,23 @@ app.use('/user/:id1', (req, res, next) => {
   next();
 })
 
-app.use('/user/:id1', (req, res, next) => {
-  // console.log(4);
-  res.end('11');
-})
-app.get('/user1/:id', (req, res, next) => {
-  // console.log(5);
-  next()
+app.get('/user/:id1', function (req, res, next) {
+  // console.log('6')
+  // res.end()
+  next();
+}, function (req, res) {
+  res.end('11')
 })
 
-app.get('/user/:id1', function (req, res) {
+app.get('/user1/q', function (req, res) {
   // console.log('6')
-  res.end()
+  res.end('qqq')
 })
-app.get('/user/:id1', function (req, res) {
-  // console.log('6')
-  res.end()
-})
-
 app.listen(3000,() => console.log('Server is running...'))
+
+/*
+如果 err 是 route 那么 layerError 就是 null
+如果 err 是 router 那么就会 调用 done 来结束
+
+
+*/
