@@ -128,3 +128,54 @@ layer 方法查看
 # 如果做到的监听 get 请求。发现没有使用 http.get
 
 没有发现 http 的响应是如何做到的监听的
+
+
+use 最终存在 router.stack 里面
+get 存在 route 里面
+
+
+router.stack 将会把 use 和 get 的两个callback 方法都给存进去
+route.stack 只会存储 get 里面的 callback
+
+
+
+每个fn都会绑定 layer 这个里面是一些校验方法和执行方法
+对于 get 请求会将 layer.route 绑定为 route
+
+![Alt text](image-13.png)
+
+
+分为两个：如上图
+use 和 get
+在 handle 方法中
+use 是简单直接 调用 trim_prefix 方法。判断是最终的执行结果
+get 是调用 layer.handle_request 方法，但是 get 的 layer fn 是 如下图
+![Alt text](image-14.png)
+所以最后是调用的 route.dispatch 方法,dispatch 方法的 next 方法中，也会调用对应的 handle_error 和 handle_request 
+
+如果这个方法是在一个 get 方法里面创建的，才会被执行到 handle_error next 如下面，就会报 err
+```
+app.get('/user/:id1', function (req, res, next) {
+  // console.log('6')
+  // res.end()
+  next('cuowu');
+}, function (err, req, res, next) {
+  console.log('fn 11111');
+  res.end('11')
+})
+```
+
+如果这样记录，就不能执行到 下面的 err。
+同时因为参数的数量问题，所以下面这样的 第二个 get是无法执行到的地方。
+```
+app.get('/user/:id1', function (req, res, next) {
+  // console.log('6')
+  // res.end()
+  next('cuowu');
+})
+
+app.get('/user/:id1', function (err, req, res, next) {
+  console.log('111111111');
+  res.end('11')
+})
+```
